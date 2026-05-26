@@ -1,5 +1,5 @@
-using AlgoTrace2;
-using AlgoTrace2.Services; // Tento using pro sloûku se servisou
+using AlgoTrace;
+using AlgoTrace.Services; // Tento using pro slo≈æku se servisou
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -7,7 +7,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// --- TENTO ÿ¡DEK OPRAVÕ TEN UNHANDLED ERROR ---
+// --- TENTO √ò√ÅDEK OPRAV√ç TEN UNHANDLED ERROR ---
 builder.Services.AddScoped<AlgorithmService>();
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
