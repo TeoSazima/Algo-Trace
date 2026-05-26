@@ -1,6 +1,6 @@
-﻿using AlgoTrace2.Models;
+﻿using AlgoTrace.Models;
 
-namespace AlgoTrace2.Services
+namespace AlgoTrace.Services
 {
     public class AlgorithmService
     {
