@@ -1,0 +1,285 @@
+﻿.dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* Rozestup mezi sekcemi jsme zvětšili pro větší vzdušnost */
+    gap: 6rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+    /* --- JEMNÉ DĚLÍCÍ LINKY MEZI SEKCI --- */
+    /* Tento zápis vytvoří tenoučkou čáru před druhou a třetí sekcí */
+    .dashboard-wrapper > section + section {
+        position: relative;
+        padding-top: 6rem; /* Odsazení obsahu od čáry */
+    }
+
+        .dashboard-wrapper > section + section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #e2e8f0; /* Velmi jemná šedá linka */
+            opacity: 0.6; /* Zajišťuje, že linka bude opravdu decentní a nerušivá */
+        }
+
+/* --- 1. HERO SEKCE STYLY --- */
+.hero-section {
+    /* Zajištění, aby první sekce neměla nad sebou čáru */
+    position: relative;
+}
+
+.badge-precision {
+    background-color: #e0ebf9;
+    color: #0b57d0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+.hero-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #051329;
+    line-height: 1.15;
+}
+
+.hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    max-width: 500px;
+}
+
+.hero-chart-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 480px;
+    padding: 1.5rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.window-dots {
+    display: flex;
+    gap: 6px;
+}
+
+    .window-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+        .window-dots span:nth-child(1) {
+            background-color: #ff5f56;
+        }
+
+        .window-dots span:nth-child(2) {
+            background-color: #ffbd2e;
+        }
+
+        .window-dots span:nth-child(3) {
+            background-color: #27c93f;
+        }
+
+.chart-title {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 180px;
+    padding: 0 0.5rem;
+}
+
+.hero-bar {
+    width: 24px;
+    background-color: #e2e8f0;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+}
+
+.hero-bar-dark {
+    background-color: #0b57d0;
+    box-shadow: 0 4px 12px rgba(11, 87, 208, 0.2);
+}
+
+.bar-lbl {
+    position: absolute;
+    top: -22px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0b57d0;
+    width: 100%;
+    text-align: center;
+}
+
+/* --- 2. KROKY (SCIENTIFIC LOGIC) --- */
+.section-title {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #051329;
+}
+
+.steps-container {
+    position: relative;
+}
+
+/* OPRAVENO: Čára nyní prochází přesným středem 60px vysoké ikony */
+.steps-line {
+    position: absolute;
+    top: 30px; /* Polovina výšky ikony (60px / 2 = 30px) */
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background-color: #e2e8f0;
+    z-index: 0;
+}
+
+.step-card {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    padding: 0 1rem;
+}
+
+.step-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+    color: #0b57d0;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.step-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #051329;
+    margin-bottom: 0.5rem;
+}
+
+.step-text {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+/* --- 3. KNIHOVNY (EXPLORE LIBRARIES) --- */
+.view-all-link {
+    color: #0b57d0 !important;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+}
+
+    .view-all-link:hover {
+        color: #0842a0 !important;
+    }
+
+.lib-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .lib-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.03);
+    }
+
+.lib-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background-color: #f0f7ff;
+    color: #0b57d0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1.25rem;
+}
+
+.lib-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #051329;
+    margin-bottom: 0.5rem;
+}
+
+.lib-desc {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+}
+
+.lib-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.lib-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #64748b;
+    background-color: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+}
+
+/* --- RESPONZIVITA --- */
+@media (max-width: 991.98px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .dashboard-wrapper {
+        gap: 3.5rem;
+    }
+
+        .dashboard-wrapper > section + section {
+            padding-top: 3.5rem;
+        }
+
+    .hero-chart-card {
+        margin-top: 1rem;
+    }
+}

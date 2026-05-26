@@ -1,0 +1,181 @@
+﻿@page "/sorting/{slug}"
+
+@using AlgoTrace2
+@using AlgoTrace2.Models
+@using AlgoTrace2.Services
+
+@inject AlgorithmService AlgoService
+@inject NavigationManager Navigation
+
+<div class="sorting-container">
+    @if (CurrentAlgorithm == null)
+    {
+        <div class="alert alert-warning">
+            <h4>Algoritmus nenalezen</h4>
+            <p>Vyberte si prosím platný algoritmus z levého menu.</p>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="fw-bold mb-0">@CurrentAlgorithm.Name</h2>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small" style="font-size: 0.75rem;">
+                    Status: Processing
+                </span>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-play-fill fs-5"></i>
+                </button>
+                <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-arrow-counterclockwise fs-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm p-4 mb-4" style="background: #ffffff; border-radius: 12px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
+                    <div class="visualization-box w-100">
+                        <div class="chart-container d-flex align-items-flex-end justify-content-center gap-2" style="height: 220px;">
+                            <div class="bar bar-light" style="height: 120px; width: 24px; background: #bfdbfe; border-radius: 4px; position: relative;"><span class="bar-value small text-muted position-absolute w-100 text-center" style="top: -20px; font-size: 0.75rem;">32</span></div>
+                            <div class="bar bar-dark active-bar" style="height: 210px; width: 24px; background: #0b57d0; border-radius: 4px; position: relative;"><span class="bar-value small text-white fw-bold position-absolute w-100 text-center" style="top: 8px; font-size: 0.75rem;">56</span></div>
+                            <div class="bar bar-dark active-bar" style="height: 160px; width: 24px; background: #0b57d0; border-radius: 4px; position: relative;"><span class="bar-value small text-white fw-bold position-absolute w-100 text-center" style="top: 8px; font-size: 0.75rem;">41</span></div>
+                            <div class="bar bar-light" style="height: 90px; width: 24px; background: #bfdbfe; border-radius: 4px; position: relative;"><span class="bar-value small text-muted position-absolute w-100 text-center" style="top: -20px; font-size: 0.75rem;">18</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-4 h-100" style="background: #0d1527; color: #f8fafc; border-radius: 12px;">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                                <i class="bi bi-code-slash me-1"></i> Pseudocode
+                            </h6>
+                            <div class="pseudocode-box" style="font-family: 'Fira Code', monospace; font-size: 0.85rem; line-height: 1.6;">
+                                @if (CurrentAlgorithm.Pseudocode != null)
+                                {
+                                    @foreach (var line in CurrentAlgorithm.Pseudocode)
+                                    {
+                                        <div class="@(line.IsKeyword ? "text-danger fw-bold" : line.IsComment ? "text-secondary" : "")">
+                                            @line.Text
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-4 h-100" style="background: #ffffff; border-radius: 12px;">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                                <i class="bi bi-diagram-3 me-1"></i> Logic Flow
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                @if (CurrentAlgorithm.LogicFlow != null)
+                                {
+                                    @foreach (var step in CurrentAlgorithm.LogicFlow)
+                                    {
+                                        <div class="p-2 rounded border @(step.Number == 2 ? "border-primary bg-primary-subtle" : "border-light-subtle") d-flex gap-3 align-items-center" style="font-size: 0.85rem;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold @(step.Number == 2 ? "bg-primary text-white" : "bg-light text-muted")" style="width: 24px; height: 24px; min-width: 24px; font-size: 0.75rem;">
+                                                @step.Number
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@step.Title</div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">@step.Description</div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 12px;">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                        <i class="bi bi-bar-chart me-1"></i> Complexity Analysis
+                    </h6>
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-7 border-end border-light-subtle">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="small text-muted mb-1">Best Case Time</div>
+                                    <div class="fs-4 fw-bold text-primary">@CurrentAlgorithm.TimeComplexityBest</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="small text-muted mb-1">Worst Case Time</div>
+                                    <div class="fs-4 fw-bold text-danger">@CurrentAlgorithm.TimeComplexityWorst</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="small text-muted mb-1">Space Complexity</div>
+                                    <div class="fs-4 fw-bold text-dark">@CurrentAlgorithm.SpaceComplexity</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 ps-md-4">
+                            <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.5;">
+                                Bubble Sort is efficient for nearly-sorted data but scales poorly with large, unsorted datasets due to its nested loop structure. In-place sorting requires only a single additional memory space for temp storage during swap operations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 12px;">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">Configuration</h6>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small mb-1">Data Input (CSV)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light-subtle border-light-subtle" style="font-size: 0.85rem;" value="12, 45, 32, 38, 8, 52, 25" />
+                            <button class="btn btn-outline-secondary border-light-subtle bg-light text-muted d-flex align-items-center gap-1" type="button" style="font-size: 0.85rem;">
+                                <i class="bi bi-file-earmark-arrow-up"></i> Import
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small">Simulation Delay</span>
+                            <span class="badge bg-light text-dark border border-light-subtle px-2 py-1">@SimulationDelay ms</span>
+                        </div>
+                        <input type="range" class="form-range" min="100" max="1000" step="50" @bind-value="SimulationDelay" @bind-value:event="oninput" />
+                    </div>
+
+                    <button class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 fw-bold" style="border-radius: 8px; font-size: 0.9rem;">
+                        <i class="bi bi-rocket-takeoff-fill"></i> Apply & Restart
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Slug { get; set; }
+
+    private AlgorithmData? CurrentAlgorithm { get; set; }
+
+    // Interaktivní proměnné pro slidery s výchozími hodnotami
+    private int SimulationDelay { get; set; } = 300; // Výchozí delay 300ms
+
+    protected override void OnParametersSet()
+    {
+        string activeSlug = Slug?.ToLower() ?? "bubble";
+
+        if (AlgorithmService.algorithms != null)
+        {
+            CurrentAlgorithm = AlgorithmService.algorithms
+                .FirstOrDefault(a => a != null && a.Slug != null && a.Slug.ToLower() == activeSlug);
+        }
+    }
+}

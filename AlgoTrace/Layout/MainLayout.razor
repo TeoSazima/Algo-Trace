@@ -1,0 +1,94 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<div class="page-wrapper">
+    <header class="top-navbar">
+        <div class="navbar-brand">
+            <h2>AlgoTrace</h2>
+        </div>
+
+        @if (IsSortingModule)
+        {
+            <button class="hamburger-btn d-lg-none" @onclick="ToggleSidebar">
+                <i class="bi bi-list"></i>
+            </button>
+        }
+
+        <nav class="top-nav-links">
+            <NavLink class="top-nav-item" href="" Match="NavLinkMatch.All">Dashboard</NavLink>
+            <NavLink class="top-nav-item" href="sorting/bubble">Sorting</NavLink>
+            <NavLink class="top-nav-item" href="pathfinding">Pathfinding</NavLink>
+            <NavLink class="top-nav-item" href="graphs">Graphs</NavLink>
+        </nav>
+    </header>
+
+    <div class="main-layout-body">
+
+        @if (IsSortingModule)
+        {
+            <aside class="sidebar @(collapseSidebar ? "collapsed" : "expanded")">
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <NavLink class="sidebar-item" href="sorting/bubble" Match="NavLinkMatch.All" @onclick="CloseSidebarOnMobile">
+                            Bubble Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/selection" @onclick="CloseSidebarOnMobile">
+                            Selection Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/insertion" @onclick="CloseSidebarOnMobile">
+                            Insertion Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/quick" @onclick="CloseSidebarOnMobile">
+                            Quick Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/merge" @onclick="CloseSidebarOnMobile">
+                            Merge Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/heap" @onclick="CloseSidebarOnMobile">
+                            Heap Sort
+                        </NavLink>
+                        <NavLink class="sidebar-item" href="sorting/introsort" @onclick="CloseSidebarOnMobile">
+                            Introsort
+                        </NavLink>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <NavLink class="sidebar-item text-muted small" href="support" @onclick="CloseSidebarOnMobile">
+                            <i class="bi bi-question-circle me-2"></i>Support
+                        </NavLink>
+                    </div>
+                </nav>
+            </aside>
+
+            @if (!collapseSidebar)
+            {
+                <div class="sidebar-overlay d-lg-none" @onclick="ToggleSidebar"></div>
+            }
+        }
+
+        <main class="main-content @(IsSortingModule ? "has-sidebar" : "")">
+            <div class="content-container">
+                @Body
+            </div>
+            <footer class="content-footer">
+                AlgoTrace Systems &copy; 2026 AlgoTrace Systems. Precision Engineering.
+            </footer>
+        </main>
+    </div>
+</div>
+
+@code {
+    private bool collapseSidebar = true;
+
+    // Logika, která kontroluje, zda se nacházíme na stránce s řazením (sorting)
+    private bool IsSortingModule => Navigation.Uri.Contains("/sorting", StringComparison.OrdinalIgnoreCase);
+
+    private void ToggleSidebar() => collapseSidebar = !collapseSidebar;
+    private void CloseSidebarOnMobile() => collapseSidebar = true;
+
+    // Hlídání změny URL adresy, aby se při překliknutí menu na mobilu správně chovalo
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += (s, e) => { collapseSidebar = true; StateHasChanged(); };
+    }
+}
