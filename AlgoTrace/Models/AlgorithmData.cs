@@ -1,4 +1,4 @@
-﻿namespace AlgoTrace2.Models
+﻿namespace AlgoTrace.Models
 {
     public class AlgorithmData
     {
