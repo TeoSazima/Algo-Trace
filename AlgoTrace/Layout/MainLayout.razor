@@ -28,38 +28,55 @@
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <div class="drawer-content">
-            <NavLink class="drawer-item" href="" Match="NavLinkMatch.All" @onclick="ToggleMobileMenu">
-                <i class="bi bi-speedometer2 me-2"></i> Dashboard
-            </NavLink>
+         <div class="drawer-content">
             
-            <div class="drawer-accordion">
-                <button class="drawer-item accordion-trigger @(isSortingExpanded ? "expanded" : "")" @onclick="ToggleSorting">
+            <div class="drawer-row">
+                <NavLink class="drawer-item" href="" Match="NavLinkMatch.All" @onclick="ToggleMobileMenu">
                     <span class="d-flex align-items-center">
-                        <i class="bi bi-filter-left me-2"></i> Sorting
+                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </span>
-                    <i class="bi bi-chevron-down arrow-icon"></i>
-                </button>
-                
-                <div class="accordion-menu @(isSortingExpanded ? "show" : "")">
-                    @if (AlgorithmService.algorithms != null)
-                    {
-                        @foreach (var algo in AlgorithmService.algorithms)
+                </NavLink>
+            </div>
+            
+            <div class="drawer-row">
+                <div class="drawer-accordion">
+                    <button class="drawer-item accordion-trigger @(isSortingExpanded ? "expanded" : "")" @onclick="ToggleSorting">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-filter-left me-2"></i> Sorting
+                        </span>
+                        <i class="bi bi-chevron-down arrow-icon"></i>
+                    </button>
+                    
+                    <div class="accordion-menu @(isSortingExpanded ? "show" : "")">
+                        @if (AlgorithmService.algorithms != null)
                         {
-                            <NavLink class="accordion-item" href="@($"sorting/{algo.Slug}")" @onclick="ToggleMobileMenu">
-                                @algo.Name
-                            </NavLink>
+                            @foreach (var algo in AlgorithmService.algorithms)
+                            {
+                                <NavLink class="accordion-item" href="@($"sorting/{algo.Slug}")" @onclick="ToggleMobileMenu">
+                                    <i class="bi bi-dot me-1"></i> @algo.Name
+                                </NavLink>
+                            }
                         }
-                    }
+                    </div>
                 </div>
             </div>
  
-            <NavLink class="drawer-item" href="pathfinding" @onclick="ToggleMobileMenu">
-                <i class="bi bi-signpost-split me-2"></i> Pathfinding
-            </NavLink>
-            <NavLink class="drawer-item" href="graphs" @onclick="ToggleMobileMenu">
-                <i class="bi bi-diagram-2 me-2"></i> Graphs
-            </NavLink>
+            <div class="drawer-row">
+                <NavLink class="drawer-item" href="pathfinding" @onclick="ToggleMobileMenu">
+                    <span class="d-flex align-items-center">
+                        <i class="bi bi-signpost-split me-2"></i> Pathfinding
+                    </span>
+                </NavLink>
+            </div>
+ 
+            <div class="drawer-row">
+                <NavLink class="drawer-item" href="graphs" @onclick="ToggleMobileMenu">
+                    <span class="d-flex align-items-center">
+                        <i class="bi bi-diagram-2 me-2"></i> Graphs
+                    </span>
+                </NavLink>
+            </div>
+ 
         </div>
     </div>
  
