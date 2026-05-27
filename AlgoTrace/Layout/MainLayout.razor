@@ -1,94 +1,123 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@using AlgoTrace2.Services
 @inject NavigationManager Navigation
-
+ 
 <div class="page-wrapper">
+    
     <header class="top-navbar">
         <div class="navbar-brand">
-            <h2>AlgoTrace</h2>
+            <h2 @onclick='() => Navigation.NavigateTo("")' style="cursor: pointer;">AlgoTrace</h2>
         </div>
-
-        @if (IsSortingModule)
-        {
-            <button class="hamburger-btn d-lg-none" @onclick="ToggleSidebar">
-                <i class="bi bi-list"></i>
-            </button>
-        }
-
-        <nav class="top-nav-links">
+ 
+        <nav class="top-nav-links d-none d-lg-flex">
             <NavLink class="top-nav-item" href="" Match="NavLinkMatch.All">Dashboard</NavLink>
             <NavLink class="top-nav-item" href="sorting/bubble">Sorting</NavLink>
             <NavLink class="top-nav-item" href="pathfinding">Pathfinding</NavLink>
             <NavLink class="top-nav-item" href="graphs">Graphs</NavLink>
         </nav>
+ 
+        <button class="burger-btn d-lg-none" @onclick="ToggleMobileMenu" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
     </header>
-
+ 
+    <div class="mobile-drawer @(isMobileMenuOpen ? "open" : "") d-lg-none">
+        <div class="drawer-header">
+            <h5 class="mb-0 fw-bold">Menu</h5>
+            <button class="close-btn" @onclick="ToggleMobileMenu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="drawer-content">
+            <NavLink class="drawer-item" href="" Match="NavLinkMatch.All" @onclick="ToggleMobileMenu">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </NavLink>
+            
+            <div class="drawer-accordion">
+                <button class="drawer-item accordion-trigger @(isSortingExpanded ? "expanded" : "")" @onclick="ToggleSorting">
+                    <span class="d-flex align-items-center">
+                        <i class="bi bi-filter-left me-2"></i> Sorting
+                    </span>
+                    <i class="bi bi-chevron-down arrow-icon"></i>
+                </button>
+                
+                <div class="accordion-menu @(isSortingExpanded ? "show" : "")">
+                    @if (AlgorithmService.algorithms != null)
+                    {
+                        @foreach (var algo in AlgorithmService.algorithms)
+                        {
+                            <NavLink class="accordion-item" href="@($"sorting/{algo.Slug}")" @onclick="ToggleMobileMenu">
+                                @algo.Name
+                            </NavLink>
+                        }
+                    }
+                </div>
+            </div>
+ 
+            <NavLink class="drawer-item" href="pathfinding" @onclick="ToggleMobileMenu">
+                <i class="bi bi-signpost-split me-2"></i> Pathfinding
+            </NavLink>
+            <NavLink class="drawer-item" href="graphs" @onclick="ToggleMobileMenu">
+                <i class="bi bi-diagram-2 me-2"></i> Graphs
+            </NavLink>
+        </div>
+    </div>
+ 
+    @if (isMobileMenuOpen)
+    {
+        <div class="drawer-overlay d-lg-none" @onclick="ToggleMobileMenu"></div>
+    }
+ 
     <div class="main-layout-body">
-
-        @if (IsSortingModule)
+        
+        @if (ShowSidebar)
         {
-            <aside class="sidebar @(collapseSidebar ? "collapsed" : "expanded")">
+            <aside class="sidebar d-none d-lg-block">
                 <nav class="sidebar-nav">
                     <div class="nav-section">
-                        <NavLink class="sidebar-item" href="sorting/bubble" Match="NavLinkMatch.All" @onclick="CloseSidebarOnMobile">
-                            Bubble Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/selection" @onclick="CloseSidebarOnMobile">
-                            Selection Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/insertion" @onclick="CloseSidebarOnMobile">
-                            Insertion Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/quick" @onclick="CloseSidebarOnMobile">
-                            Quick Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/merge" @onclick="CloseSidebarOnMobile">
-                            Merge Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/heap" @onclick="CloseSidebarOnMobile">
-                            Heap Sort
-                        </NavLink>
-                        <NavLink class="sidebar-item" href="sorting/introsort" @onclick="CloseSidebarOnMobile">
-                            Introsort
-                        </NavLink>
-                    </div>
-
-                    <div class="sidebar-footer">
-                        <NavLink class="sidebar-item text-muted small" href="support" @onclick="CloseSidebarOnMobile">
-                            <i class="bi bi-question-circle me-2"></i>Support
-                        </NavLink>
+                        @if (AlgorithmService.algorithms != null)
+                        {
+                            @foreach (var algo in AlgorithmService.algorithms)
+                            {
+                                <NavLink class="sidebar-item" href="@($"sorting/{algo.Slug}")">@algo.Name</NavLink>
+                            }
+                        }
                     </div>
                 </nav>
             </aside>
-
-            @if (!collapseSidebar)
-            {
-                <div class="sidebar-overlay d-lg-none" @onclick="ToggleSidebar"></div>
-            }
         }
-
-        <main class="main-content @(IsSortingModule ? "has-sidebar" : "")">
+ 
+        <main class="main-content @(ShowSidebar ? "has-sidebar" : "")">
             <div class="content-container">
                 @Body
             </div>
-            <footer class="content-footer">
-                AlgoTrace Systems &copy; 2026 AlgoTrace Systems. Precision Engineering.
+            <footer class="content-footer text-center">
+                AlgoTrace Systems &copy; 2026. Precision Engineering.
             </footer>
         </main>
     </div>
 </div>
-
+ 
 @code {
-    private bool collapseSidebar = true;
-
-    // Logika, která kontroluje, zda se nacházíme na stránce s řazením (sorting)
-    private bool IsSortingModule => Navigation.Uri.Contains("/sorting", StringComparison.OrdinalIgnoreCase);
-
-    private void ToggleSidebar() => collapseSidebar = !collapseSidebar;
-    private void CloseSidebarOnMobile() => collapseSidebar = true;
-
-    // Hlídání změny URL adresy, aby se při překliknutí menu na mobilu správně chovalo
+    private bool isMobileMenuOpen = false;
+    private bool isSortingExpanded = false;
+ 
+    // Logika, která zjistí, zda jsme na stránce se sortingem a má se ukázat PC levý sidebar
+    private bool ShowSidebar => Navigation.Uri.Contains("/sorting/", StringComparison.OrdinalIgnoreCase);
+ 
+    private void ToggleMobileMenu()
+    {
+        isMobileMenuOpen = !isMobileMenuOpen;
+    }
+ 
+    private void ToggleSorting()
+    {
+        isSortingExpanded = !isSortingExpanded;
+    }
+ 
+    // Automaticky zavřít menu, pokud se změní URL adresa zvenčí
     protected override void OnInitialized()
     {
-        Navigation.LocationChanged += (s, e) => { collapseSidebar = true; StateHasChanged(); };
+        Navigation.LocationChanged += (s, e) => { isMobileMenuOpen = false; StateHasChanged(); };
     }
 }
