@@ -164,8 +164,7 @@
     }
 }
 /* --- STYLY PRO MOBILNÍ BURGER MENU (DRAWER) --- */
- 
-/* Tlačítko burgeru v navbaru */
+
 .burger-btn {
     background: none;
     border: none;
@@ -176,12 +175,11 @@
     display: flex;
     align-items: center;
 }
- 
-/* Samotný kontejner menu schovaný vpravo mimo obrazovku */
+
 .mobile-drawer {
     position: fixed;
     top: 0;
-    right: -280px; /* Šířka menu, schované vpravo */
+    right: -280px;
     width: 280px;
     height: 100vh;
     background-color: #ffffff;
@@ -189,23 +187,21 @@
     z-index: 1100;
     display: flex;
     flex-direction: column;
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Plynulé vysunutí */
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
- 
-/* Třída, kterou Blazor přidá při otevření */
-.mobile-drawer.open {
-    right: 0;
-}
- 
-/* Hlavička vysouvacího menu */
+
+    .mobile-drawer.open {
+        right: 0;
+    }
+
 .drawer-header {
-    padding: 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
- 
+
 .close-btn {
     background: none;
     border: none;
@@ -213,82 +209,98 @@
     font-size: 1.2rem;
     cursor: pointer;
 }
- 
-/* Obsah menu s odkazy */
+
 .drawer-content {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-}
- 
-/* Styl jednotlivých hlavních odkazů */
-.drawer-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.85rem 1.5rem;
-    color: #475569 !important;
-    font-weight: 500;
-    font-size: 0.95rem;
-    text-decoration: none;
-    border: none;
-    background: transparent;
     width: 100%;
-    text-align: left;
 }
- 
+
+.drawer-row {
+    width: 100%;
+    display: block;
+}
+/* TOTÁLNÍ RESET A SJEDNOCENÍ VŠECH POLOŽEK /
+.drawer-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 52px !important; / Pevná stejná výška pro všechny /
+    padding: 0 1.5rem !important; / Přesný odraz od levého okraje pro VŠECHNY /
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    text-decoration: none !important;
+
+    / Tento reset vymaže chování Bootstrap tlačítka /
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+}
+
 .drawer-item:hover, .drawer-item.active {
     color: #0b57d0 !important;
-    background-color: #f8fafc;
+    background-color: #f8fafc !important;
 }
- 
-/* --- HARMONIKA (ACCORDION) PRO ALGORITMY --- */
+
+/ --- HARMONIKA (ACCORDION) PRO ALGORITMY --- */
 .drawer-accordion {
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
- 
+
 .accordion-trigger .arrow-icon {
     font-size: 0.8rem;
     transition: transform 0.2s ease;
 }
- 
-/* Otočení šipky dolů, když je harmonika rozbalená */
+
 .accordion-trigger.expanded .arrow-icon {
     transform: rotate(180deg);
     color: #0b57d0;
 }
- 
-/* Skrytý kontejner pro pod-odkazy algoritmů */
+
 .accordion-menu {
     max-height: 0;
     overflow: hidden;
     background-color: #f8fafc;
     transition: max-height 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
- 
-/* Třída pro rozbalení */
-.accordion-menu.show {
-    max-height: 400px; /* Dostatečná výška pro seznam algoritmů */
-}
- 
-/* Jednotlivé vnitřní odkazy na algoritmy */
+
+    .accordion-menu.show {
+        max-height: 500px;
+    }
+/* POD-POLOŽKY ALGORITMŮ S VELKÝM ODSLAZENÍM /
 .accordion-item {
-    display: block;
-    padding: 0.65rem 1.5rem 0.65rem 3rem; /* Větší odsazení zleva */
-    font-size: 0.85rem;
-    color: #64748b !important;
-    text-decoration: none;
-    font-weight: 500;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 42px !important;
+    padding-left: 3.5rem !important; / Výrazný odskok doprava, aby to spadalo pod Sorting */
+font-size: 0.9rem !important;
+color: #64748b !important;
+text-decoration: none !important;
+font-weight: 500 !important;
+box-sizing: border-box !important;
+border: 0 !important;
+background: transparent !important;
 }
- 
+
 .accordion-item:hover, .accordion-item.active {
     color: #0b57d0 !important;
-    background-color: #f1f5f9;
+    background-color: #f1f5f9 !important;
 }
- 
-/* Zatmění zbytku obrazovky */
+
 .drawer-overlay {
     position: fixed;
     top: 0;
