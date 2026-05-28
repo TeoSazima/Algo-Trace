@@ -7,7 +7,7 @@ namespace AlgoTrace.Services
         public static List<AlgorithmData> algorithms => new()
         {
             // =================================================================
-            // ZÁKLADNÍ A JEDNODUCHÉ ALGORITMY (O(n²))
+            // BASIC AND SIMPLE ALGORITHMS (O(n²))
             // =================================================================
 
             // --- BUBBLE SORT ---
@@ -15,7 +15,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "bubble",
                 Name = "Bubble Sort",
-                Description = "Jednoduchý řadicí algoritmus, který opakovaně prochází seznam a prohazuje sousední prvky, pokud jsou ve špatném pořadí. Největší prvky postupně 'probublávají' na konec.",
+                Description = "A simple sorting algorithm that repeatedly traverses the list and swaps adjacent elements if they are in the wrong order. The largest elements gradually 'bubble up' to the end.",
                 TimeComplexityBest = "O(N)",
                 TimeComplexityAverage = "O(N²)",
                 TimeComplexityWorst = "O(N²)",
@@ -33,9 +33,9 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Pointer Initialization", Description = "Nastavení ukazatelů na začátek pole." },
-                    new LogicStep { Number = 2, Title = "Compare Adjacent Elements", Description = "Porovnání dvou sousedních prvků (A[i] > A[i+1])." },
-                    new LogicStep { Number = 3, Title = "Conditional Swap", Description = "Pokud je levý prvek větší než pravý, prohodí se." }
+                    new LogicStep { Number = 1, Title = "Pointer Initialization", Description = "Setting the pointers to the beginning of the array." },
+                    new LogicStep { Number = 2, Title = "Compare Adjacent Elements", Description = "Comparing two adjacent elements (A[i] > A[i+1])." },
+                    new LogicStep { Number = 3, Title = "Conditional Swap", Description = "If the left element is greater than the right one, they are swapped." }
                 }
             },
 
@@ -44,7 +44,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "selection",
                 Name = "Selection Sort",
-                Description = "Algoritmus pracuje tak, že najde nejmenší prvek v neseřazené části pole a vymění ho s prvním prvkem této neseřazené části.",
+                Description = "The algorithm works by finding the smallest element in the unsorted part of the array and swapping it with the first element of this unsorted part.",
                 TimeComplexityBest = "O(N²)",
                 TimeComplexityAverage = "O(N²)",
                 TimeComplexityWorst = "O(N²)",
@@ -59,8 +59,8 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Find Minimum", Description = "Prohledání neseřazené části pole a nalezení minima." },
-                    new LogicStep { Number = 2, Title = "Swap with Start", Description = "Výměna nalezeného minima s prvním prvkem neseřazené části." }
+                    new LogicStep { Number = 1, Title = "Find Minimum", Description = "Searching the unsorted part of the array and finding the minimum." },
+                    new LogicStep { Number = 2, Title = "Swap with Start", Description = "Swapping the found minimum with the first element of the unsorted part." }
                 }
             },
 
@@ -69,7 +69,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "insertion",
                 Name = "Insertion Sort",
-                Description = "Postupně bere prvky z neseřazené části a vkládá (inseruje) je na správné místo v již seřazené levé části pole. Podobá se řazení karet v ruce.",
+                Description = "Gradually takes elements from the unsorted part and inserts them into the correct position in the already sorted left part of the array. Similar to how you sort cards in your hand.",
                 TimeComplexityBest = "O(N)",
                 TimeComplexityAverage = "O(N²)",
                 TimeComplexityWorst = "O(N²)",
@@ -87,14 +87,14 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Pick Key Element", Description = "Výběr aktuálního prvku jako 'klíče', který budeme vkládat." },
-                    new LogicStep { Number = 2, Title = "Shift Elements", Description = "Posouvání větších prvků v seřazené části doprava, dokud nenajdeme správnou pozici." },
-                    new LogicStep { Number = 3, Title = "Insert Key", Description = "Vložení klíče na jeho nové, správné místo v seřazeném úseku." }
+                    new LogicStep { Number = 1, Title = "Pick Key Element", Description = "Selecting the current element as the 'key' that will be inserted." },
+                    new LogicStep { Number = 2, Title = "Shift Elements", Description = "Shifting larger elements in the sorted part to the right until the correct position is found." },
+                    new LogicStep { Number = 3, Title = "Insert Key", Description = "Inserting the key into its new, correct position in the sorted segment." }
                 }
             },
 
             // =================================================================
-            // EFEKTIVNÍ ALGORITMY (O(n log n))
+            // EFFICIENT ALGORITHMS (O(n log n))
             // =================================================================
 
             // --- QUICK SORT ---
@@ -102,7 +102,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "quick",
                 Name = "Quick Sort",
-                Description = "Vysoce efektivní algoritmus na principu 'Rozděl a panuj'. Vybere prvek zvaný pivot a rozdělí pole na prvky menší a větší než pivot. Následně se rekurzivně zavolá na obě poloviny.",
+                Description = "A highly efficient algorithm based on the 'Divide and Conquer' principle. It selects an element called the pivot and splits the array into elements smaller and larger than the pivot. Then it recursively calls itself on both halves.",
                 TimeComplexityBest = "O(N log N)",
                 TimeComplexityAverage = "O(N log N)",
                 TimeComplexityWorst = "O(N²)",
@@ -117,31 +117,9 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Pivot Selection", Description = "Zvolení referenčního prvku (pivota) z aktuálního úseku pole." },
-                    new LogicStep { Number = 2, Title = "Partitioning", Description = "Přerovnání prvků – menší než pivot jdou vlevo, větší jdou vpravo." },
-                    new LogicStep { Number = 3, Title = "Recursive Call", Description = "Nezávislé spuštění stejného procesu pro levou a pravou část od pivota." }
-                }
-            },
-            new AlgorithmData
-{
-                Slug = "bogo",
-                Name = "Bogo Sort",
-                Description = "Extrémně neefektivní a humorný řadicí algoritmus založený na čisté náhodě. Funguje tak, že zkontroluje, zda je pole seřazené, a pokud ne, celé ho náhodně promíchá a zkouší to znovu.",
-                TimeComplexityBest = "O(N)",
-                TimeComplexityAverage = "O(N · N!)",
-                TimeComplexityWorst = "O(∞)",
-                SpaceComplexity = "O(1)",
-                Pseudocode = new()
-                {
-                    new PseudocodeLine { Text = "procedure bogoSort(A : list of sortable items)", IsKeyword = true },
-                    new PseudocodeLine { Text = "    while not isSorted(A) do", IsKeyword = true },
-                    new PseudocodeLine { Text = "        shuffle(A)", IsComment = false }
-                },
-                LogicFlow = new()
-                {
-                    new LogicStep { Number = 1, Title = "Check Sortedness", Description = "Kontrola, zda jsou všechny prvky v poli již správně seřazeny od nejmenšího po největší." },
-                    new LogicStep { Number = 2, Title = "Random Shuffle", Description = "Pokud pole seřazené není, kompletně a zcela náhodně se promíchají všechny jeho prvky." },
-                    new LogicStep { Number = 3, Title = "Repeat Until Lucky", Description = "Opakování celého procesu kontroly a míchání znovu a znovu, dokud algoritmus nemá prosté štěstí." }
+                    new LogicStep { Number = 1, Title = "Pivot Selection", Description = "Choosing a reference element (pivot) from the current segment of the array." },
+                    new LogicStep { Number = 2, Title = "Partitioning", Description = "Rearranging elements – those smaller than the pivot go to the left, larger ones go to the right." },
+                    new LogicStep { Number = 3, Title = "Recursive Call", Description = "Independently running the same process for the left and right parts around the pivot." }
                 }
             }
         };
