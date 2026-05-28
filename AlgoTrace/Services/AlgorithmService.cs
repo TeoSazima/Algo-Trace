@@ -11,7 +11,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "bubble",
                 Name = "Bubble Sort",
-                Description = "Jednoduchý řadicí algoritmus, který opakovaně prochází seznam a prohazuje sousední prvky, pokud jsou ve špatném pořadí.",
+                Description = "A simple sorting algorithm that repeatedly passes through the list and swaps adjacent elements if they are in the wrong order.",
                 TimeComplexityBest = "O(N)",
                 TimeComplexityAverage = "O(N²)",
                 TimeComplexityWorst = "O(N²)",
@@ -29,9 +29,9 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Pointer Initialization", Description = "Nastavení ukazatelů na začátek pole." },
-                    new LogicStep { Number = 2, Title = "Compare Adjacent Elements", Description = "Porovnání dvou sousedních prvků (A[i] > A[i+1])." },
-                    new LogicStep { Number = 3, Title = "Conditional Swap", Description = "Pokud je levý prvek větší než pravý, prohodí se." }
+                    new LogicStep { Number = 1, Title = "Pointer Initialization", Description = "Setting the pointers to the beginning of the array." },
+                    new LogicStep { Number = 2, Title = "Compare Adjacent Elements", Description = "Comparing two adjacent elements (A[i] > A[i+1])." },
+                    new LogicStep { Number = 3, Title = "Conditional Swap", Description = "If the left element is larger than the right one, they are swapped." }
                 }
             },
 
@@ -40,7 +40,7 @@ namespace AlgoTrace.Services
             {
                 Slug = "selection",
                 Name = "Selection Sort",
-                Description = "Algoritmus pracuje tak, že najde nejmenší prvek v neseřazené části pole a vymění ho s prvním prvkem.",
+                Description = "The algorithm works by finding the smallest element in the unsorted part of the array and swapping it with the first element.",
                 TimeComplexityBest = "O(N²)",
                 TimeComplexityAverage = "O(N²)",
                 TimeComplexityWorst = "O(N²)",
@@ -55,13 +55,13 @@ namespace AlgoTrace.Services
                 },
                 LogicFlow = new()
                 {
-                    new LogicStep { Number = 1, Title = "Find Minimum", Description = "Prohledání neseřazené části pole a nalezení minima." },
-                    new LogicStep { Number = 2, Title = "Swap with Start", Description = "Výměna nalezeného minima s prvním prvkem neseřazené části." }
+                    new LogicStep { Number = 1, Title = "Find Minimum", Description = "Searching the unsorted part of the array and finding the minimum." },
+                    new LogicStep { Number = 2, Title = "Swap with Start", Description = "Swapping the found minimum with the first element of the unsorted part." }
                 }
             }
         };
 
-        // Metoda, která podle slugu vrátí konkrétní algoritmus
+        // Method that returns a specific algorithm based on its slug
         public AlgorithmData? GetAlgorithmBySlug(string slug)
         {
             return algorithms.FirstOrDefault(a => a.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
