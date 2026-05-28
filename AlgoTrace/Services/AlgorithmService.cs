@@ -1,4 +1,4 @@
-﻿using AlgoTrace.Models;
+using AlgoTrace.Models;
 
 namespace AlgoTrace.Services
 {
