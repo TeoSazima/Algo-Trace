@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @using AlgoTrace.Services
 @inject NavigationManager Navigation
+@inject StringAlgorithmService StringAlgorithmService
  
 <div class="page-wrapper">
     
@@ -12,8 +13,8 @@
         <nav class="top-nav-links d-none d-lg-flex">
             <NavLink class="top-nav-item" href="" Match="NavLinkMatch.All">Dashboard</NavLink>
             <NavLink class="top-nav-item" href="sorting/bubble">Sorting</NavLink>
+            <NavLink class="top-nav-item" href="strings/naive">Strings</NavLink>
             <NavLink class="top-nav-item" href="pathfinding">Pathfinding</NavLink>
-            <NavLink class="top-nav-item" href="graphs">Graphs</NavLink>
         </nav>
  
         <button class="burger-btn d-lg-none" @onclick="ToggleMobileMenu" aria-label="Toggle navigation">
@@ -60,14 +61,28 @@
             </div>
 
             <div class="drawer-row">
-                <NavLink class="drawer-item" href="pathfinding" @onclick="ToggleMobileMenu">
-                    <i class="bi bi-signpost-split me-2"></i> Pathfinding
-                </NavLink>
+                <div class="drawer-accordion w-100">
+                    <button class="drawer-item accordion-trigger @(isStringsExpanded ? "expanded" : "")" @onclick="ToggleStrings" type="button">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-fonts me-2"></i> Strings
+                        </span>
+                        <i class="bi bi-chevron-down arrow-icon"></i>
+                    </button>
+
+                    <div class="accordion-menu @(isStringsExpanded ? "show" : "")">
+                        @foreach (var algo in StringAlgorithmService.algorithms)
+                        {
+                            <NavLink class="accordion-item" href="@($"strings/{algo.Slug}")" @onclick="ToggleMobileMenu">
+                                <i class="bi bi-dot me-1"></i> @algo.Name
+                            </NavLink>
+                        }
+                    </div>
+                </div>
             </div>
 
             <div class="drawer-row">
-                <NavLink class="drawer-item" href="graphs" @onclick="ToggleMobileMenu">
-                    <i class="bi bi-diagram-2 me-2"></i> Graphs
+                <NavLink class="drawer-item" href="pathfinding" @onclick="ToggleMobileMenu">
+                    <i class="bi bi-signpost-split me-2"></i> Pathfinding
                 </NavLink>
             </div>
 
@@ -86,11 +101,18 @@
             <aside class="sidebar d-none d-lg-block">
                 <nav class="sidebar-nav">
                     <div class="nav-section">
-                        @if (AlgorithmService.algorithms != null)
+                        @if (Navigation.Uri.Contains("/sorting/", StringComparison.OrdinalIgnoreCase))
                         {
                             @foreach (var algo in AlgorithmService.algorithms)
                             {
                                 <NavLink class="sidebar-item" href="@($"sorting/{algo.Slug}")">@algo.Name</NavLink>
+                            }
+                        }
+                        else if (Navigation.Uri.Contains("/strings/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            @foreach (var algo in StringAlgorithmService.algorithms)
+                            {
+                                <NavLink class="sidebar-item" href="@($"strings/{algo.Slug}")">@algo.Name</NavLink>
                             }
                         }
                     </div>
@@ -112,21 +134,27 @@
 @code {
     private bool isMobileMenuOpen = false;
     private bool isSortingExpanded = false;
- 
-    // Logika, která zjistí, zda jsme na stránce se sortingem a má se ukázat PC levý sidebar
-    private bool ShowSidebar => Navigation.Uri.Contains("/sorting/", StringComparison.OrdinalIgnoreCase);
- 
+    private bool isStringsExpanded = false;
+
+    private bool ShowSidebar =>
+        Navigation.Uri.Contains("/sorting/", StringComparison.OrdinalIgnoreCase)
+        || Navigation.Uri.Contains("/strings/", StringComparison.OrdinalIgnoreCase);
+
     private void ToggleMobileMenu()
     {
         isMobileMenuOpen = !isMobileMenuOpen;
     }
- 
+
     private void ToggleSorting()
     {
         isSortingExpanded = !isSortingExpanded;
     }
- 
-    // Automaticky zavřít menu, pokud se změní URL adresa zvenčí
+
+    private void ToggleStrings()
+    {
+        isStringsExpanded = !isStringsExpanded;
+    }
+
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += (s, e) => { isMobileMenuOpen = false; StateHasChanged(); };

@@ -1,13 +1,619 @@
 ﻿@page "/pathfinding"
-@inject HttpClient Http
 
-<PageTitle>PathFinding</PageTitle>
+@using AlgoTrace.Services
 
-<h1>Comming Soon..</h1>
+<div class="sorting-container">
 
-<p>We are sorry, but this page is currently under maintenance</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="fw-bold mb-0">A* Pathfinding</h2>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small"
+                  style="font-size: 0.75rem;">
+                Status: @GetStatus();
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;"
+                    @onclick="SimulationButton"
+                    disabled="@(_isDone)">
+                @if (_isRunning)
+                {
+                    <i class="bi bi-pause-fill fs-5"></i>
+                }
+                else
+                {
+                    <i class="bi bi-play-fill fs-5"></i>
+                }
+            </button>
+            <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;"
+                    @onclick="ResetAlgoState">
+                <i class="bi bi-arrow-counterclockwise fs-5"></i>
+            </button>
+        </div>
+    </div>
 
-@code
-{
+    <div class="row g-4">
+        <div class="col-lg-8">
 
+
+            <div class="card border-0 shadow-sm p-4 mb-4"
+                 style="background: #ffffff; border-radius: 12px;">
+                <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size:.68rem; letter-spacing:.05em;">
+                        <i class="bi bi-grid me-1"></i>Grid — click to toggle walls
+                    </span>
+                    @if (_stepMessages.Count > 0)
+                    {
+                        <span class="ms-auto px-3 py-1 rounded" style="background:#f0f9ff; font-size:.78rem; color:#374151;">
+                            @_stepMessages.LastOrDefault()
+                        </span>
+                    }
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(@COLS, 1fr); gap: 3px; max-width: 560px;">
+                    @for (int row = 0; row < ROWS; row++)
+                    {
+                        @for (int col = 0; col < COLS; col++)
+                        {
+                            int r = row, c = col;
+                            CellState state = _grid[r, c];
+                            string bg = CellColor(r, c);
+                            string cursor = (state == CellState.Start || state == CellState.End) ? "not-allowed" : "pointer";
+                            string title = state switch
+                            {
+                                CellState.Start => "Start",
+                                CellState.End => "End",
+                                CellState.Wall => "Wall",
+                                CellState.Open => "Open list",
+                                CellState.Closed => "Closed list",
+                                CellState.Path => "Final path",
+                                _ => $"({r},{c})"
+                            };
+
+                            <div @onclick="() => ToggleWall(r, c)"
+                                 title="@title"
+                                 style="aspect-ratio:1; background:@bg; border-radius:4px;
+                                                cursor:@cursor; transition: background .12s;
+                                                display:flex; align-items:center; justify-content:center;">
+                                @if (state == CellState.Start)
+                                {
+                                    <i class="bi bi-geo-alt-fill" style="color:#fff; font-size:.7rem;"></i>
+                                }
+                                else if (state == CellState.End)
+                                {
+                                    <i class="bi bi-flag-fill" style="color:#fff; font-size:.7rem;"></i>
+                                }
+                                else if (_fScores[r, c] > 0 && state == CellState.Open)
+                                {
+                                    <span style="font-size:.48rem; color:#0b57d0; font-weight:bold; line-height:1;">
+                                        @_fScores[r, c]
+                                    </span>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-4 h-100"
+                         style="background: #0d1527; color: #f8fafc; border-radius: 12px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3"
+                            style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                            <i class="bi bi-code-slash me-1"></i> Pseudocode
+                        </h6>
+                        <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.7;">
+                            @foreach (var (line, highlight) in _pseudocode)
+                            {
+                                <div class="@(highlight ? "text-warning fw-bold" : line.StartsWith("//") ? "text-secondary" : line.Contains("func") || line.Contains("while") || line.Contains("if") || line.Contains("for") ? "text-danger" : "")">
+                                    @line
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-4 h-100"
+                         style="background: #ffffff; border-radius: 12px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3"
+                            style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                            <i class="bi bi-diagram-3 me-1"></i> Logic Flow
+                        </h6>
+                        <div class="d-flex flex-column gap-2">
+                            @for (int s = 0; s < _logicSteps.Count; s++)
+                            {
+                                int si = s;
+                                var step = _logicSteps[si];
+                                bool active = si == _currentLogicStep;
+                                <div class="p-2 rounded border d-flex align-items-start gap-2 @(active ? "border-primary bg-primary-subtle" : "border-light-subtle")">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center @(active ? "bg-primary text-white" : "bg-light text-muted")"
+                                         style="width: 24px; height: 24px; min-width: 24px; font-size: 0.75rem;">
+                                        @(si + 1)
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@step.title</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@step.desc</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 12px;">
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                    <i class="bi bi-bar-chart me-1"></i> Complexity Analysis
+                </h6>
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-7 border-end border-light-subtle">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="small text-muted mb-1">Best Case Time</div>
+                                <div class="fs-4 fw-bold text-primary">O(1)</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted mb-1">Worst Case Time</div>
+                                <div class="fs-4 fw-bold text-danger">O(E log V)</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted mb-1">Space Complexity</div>
+                                <div class="fs-4 fw-bold text-dark">O(V)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 ps-md-4">
+                        <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.5;">
+                            A* combines Dijkstra's guaranteed shortest path with a heuristic (Manhattan distance) to guide the search toward the goal — making it faster in practice while remaining optimal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 12px;">
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                    Configuration
+                </h6>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small mb-1">Start Position</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" class="form-control form-control-sm" min="0" max="@(ROWS - 1)"
+                               @bind="_startRow" placeholder="Row" />
+                        <input type="number" class="form-control form-control-sm" min="0" max="@(COLS - 1)"
+                               @bind="_startCol" placeholder="Col" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-muted small mb-1">End Position</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" class="form-control form-control-sm" min="0" max="@(ROWS - 1)"
+                               @bind="_endRow" placeholder="Row" />
+                        <input type="number" class="form-control form-control-sm" min="0" max="@(COLS - 1)"
+                               @bind="_endCol" placeholder="Col" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">Simulation Delay</span>
+                        <span class="badge bg-light text-dark border border-light-subtle px-2 py-1">@SimulationDelay ms</span>
+                    </div>
+                    <input type="range" class="form-range" min="50" max="800" step="25"
+                           @bind="SimulationDelay" @bind:event="oninput" />
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <button class="btn btn-outline-secondary flex-fill py-2 fw-bold"
+                            style="border-radius: 8px; font-size: 0.85rem;"
+                            @onclick="ClearWalls">
+                        <i class="bi bi-eraser me-1"></i> Clear Walls
+                    </button>
+                    <button class="btn btn-outline-secondary flex-fill py-2 fw-bold"
+                            style="border-radius: 8px; font-size: 0.85rem;"
+                            @onclick="RandomizeWalls">
+                        <i class="bi bi-shuffle me-1"></i> Random
+                    </button>
+                </div>
+
+                <button class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 fw-bold"
+                        style="border-radius: 8px; font-size: 0.9rem;"
+                        @onclick="ResetGrid">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Apply
+                </button>
+
+
+                @if (_statsOpen > 0 || _statsClosed > 0)
+                {
+                    <div class="mt-4 p-3 rounded" style="background:#f8fafc; font-size:.8rem;">
+                        <div class="fw-bold mb-2" style="font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#6b7280;">Live Stats</div>
+                        <div class="d-flex justify-content-between"><span class="text-muted">Open list:</span> <span class="fw-bold text-primary">@_statsOpen</span></div>
+                        <div class="d-flex justify-content-between"><span class="text-muted">Closed list:</span> <span class="fw-bold">@_statsClosed</span></div>
+                        <div class="d-flex justify-content-between"><span class="text-muted">Steps taken:</span> <span class="fw-bold">@_stepCount</span></div>
+                        @if (_isDone && _pathLength > 0)
+                        {
+                            <div class="d-flex justify-content-between mt-1"><span class="text-muted">Path length:</span> <span class="fw-bold text-success">@_pathLength</span></div>
+                        }
+                        @if (_isDone && _pathLength == 0)
+                        {
+                            <div class="text-danger mt-1">No path found!</div>
+                        }
+                    </div>
+                }
+
+
+                <div class="mt-4">
+                    <div class="text-muted small fw-bold text-uppercase mb-2" style="font-size:.68rem; letter-spacing:.05em;">Legend</div>
+                    <div class="d-flex flex-column gap-1" style="font-size:.78rem;">
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#0b57d0;border-radius:3px;"></div><span class="text-muted">Start</span></div>
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#dc2626;border-radius:3px;"></div><span class="text-muted">End</span></div>
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#1e293b;border-radius:3px;"></div><span class="text-muted">Wall</span></div>
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#bfdbfe;border-radius:3px;"></div><span class="text-muted">Open list (f-score shown)</span></div>
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#93c5fd;border-radius:3px;"></div><span class="text-muted">Closed list</span></div>
+                        <div class="d-flex align-items-center gap-2"><div style="width:16px;height:16px;background:#fbbf24;border-radius:3px;"></div><span class="text-muted">Final path</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    const int ROWS = 14, COLS = 20;
+
+    private int _startRow = 2, _startCol = 1;
+    private int _endRow = 11, _endCol = 18;
+    private int SimulationDelay = 120;
+    private bool _isRunning = false;
+    private bool _isDone = false;
+
+    private int _statsOpen = 0, _statsClosed = 0, _stepCount = 0, _pathLength = 0;
+    private List<string> _stepMessages = new();
+
+    private CellState[,] _grid = new CellState[ROWS, COLS];
+    private int[,] _fScores = new int[ROWS, COLS];
+    private int _currentLogicStep = -1;
+
+    // A* runtime
+    private int[,] _gCost = new int[ROWS, COLS];
+    private int[,] _hCost = new int[ROWS, COLS];
+    private (int r, int c)[,] _parent = new (int, int)[ROWS, COLS];
+    private HashSet<(int, int)> _openSet = new();
+    private HashSet<(int, int)> _closedSet = new();
+    private bool _astarInitialized = false;
+    private bool _pathFound = false;
+
+    private readonly List<(string title, string desc)> _logicSteps = new()
+    {
+        ("Initialize", "Add the start node to the open list with g=0, h=heuristic to end."),
+        ("Select Node", "Pick the node with the lowest f = g + h from the open list."),
+        ("Check Goal", "If the selected node is the goal, reconstruct and display path."),
+        ("Expand Neighbors", "For each walkable neighbor, compute g, h, f and add to open list if better."),
+        ("Reconstruct Path", "Trace parent pointers from end to start to build the final path.")
+    };
+
+    private List<(string text, bool highlight)> _pseudocode = new()
+    {
+        ("func aStar(start, end):", false),
+        ("    openList := {start}", false),
+        ("    g[start] := 0", false),
+        ("    f[start] := h(start, end)", false),
+        ("    while openList not empty:", false),
+        ("        current := node with min f in openList", false),
+        ("        if current == end:", false),
+        ("            return reconstructPath()", false),
+        ("        move current to closedList", false),
+        ("        for each neighbor of current:", false),
+        ("            if neighbor in closedList: skip", false),
+        ("            tentativeG := g[current] + 1", false),
+        ("            if tentativeG < g[neighbor]:", false),
+        ("                parent[neighbor] := current", false),
+        ("                g[neighbor] := tentativeG", false),
+        ("                f[neighbor] := g + h(neighbor,end)", false),
+        ("                add neighbor to openList", false),
+        ("    return no path", false)
+    };
+
+    protected override void OnInitialized() => ResetGrid();
+
+    private void ResetGrid()
+    {
+        _isRunning = false;
+        _isDone = false;
+        _statsOpen = _statsClosed = _stepCount = _pathLength = 0;
+        _stepMessages.Clear();
+        _currentLogicStep = -1;
+        _astarInitialized = false;
+        _pathFound = false;
+        _openSet.Clear();
+        _closedSet.Clear();
+
+        // Save walls before wiping
+        var savedWalls = new bool[ROWS, COLS];
+        if (_grid != null)
+            for (int i = 0; i < ROWS; i++)
+                for (int j = 0; j < COLS; j++)
+                    savedWalls[i, j] = _grid[i, j] == CellState.Wall;
+
+        _grid = new CellState[ROWS, COLS];
+        _fScores = new int[ROWS, COLS];
+        _gCost = new int[ROWS, COLS];
+        _hCost = new int[ROWS, COLS];
+        _parent = new (int, int)[ROWS, COLS];
+
+        for (int i = 0; i < ROWS; i++)
+            for (int j = 0; j < COLS; j++)
+            {
+                _parent[i, j] = (-1, -1);
+                if (savedWalls[i, j]) _grid[i, j] = CellState.Wall;
+            }
+
+        _grid[_startRow, _startCol] = CellState.Start;
+        _grid[_endRow, _endCol] = CellState.End;
+
+        SetPseudoHighlight(-1);
+    }
+
+    private void ClearWalls()
+    {
+        // Mark all walls as empty before ResetGrid saves them
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS; c++)
+                if (_grid[r, c] == CellState.Wall)
+                    _grid[r, c] = CellState.Empty;
+        ResetGrid();
+    }
+
+    private Random _rng = new Random();
+    private void RandomizeWalls()
+    {
+        ClearWalls();
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS; c++)
+                if (_grid[r, c] == CellState.Empty && _rng.NextDouble() < 0.28)
+                    _grid[r, c] = CellState.Wall;
+    }
+
+    private void ToggleWall(int r, int c)
+    {
+        if (_grid[r, c] == CellState.Start || _grid[r, c] == CellState.End) return;
+        if (_isRunning) return;
+        _grid[r, c] = _grid[r, c] == CellState.Wall ? CellState.Empty : CellState.Wall;
+        ResetAlgoState();
+    }
+
+    // Reset only algorithm state (open/closed sets, scores etc.) without touching the grid
+    private void ResetAlgoState()
+    {
+        _isRunning = false;
+        _isDone = false;
+        _statsOpen = _statsClosed = _stepCount = _pathLength = 0;
+        _stepMessages.Clear();
+        _currentLogicStep = -1;
+        _astarInitialized = false;
+        _pathFound = false;
+        _openSet.Clear();
+        _closedSet.Clear();
+
+        _fScores = new int[ROWS, COLS];
+        _gCost = new int[ROWS, COLS];
+        _hCost = new int[ROWS, COLS];
+        _parent = new (int, int)[ROWS, COLS];
+
+        for (int i = 0; i < ROWS; i++)
+            for (int j = 0; j < COLS; j++)
+                _parent[i, j] = (-1, -1);
+
+        // Restore only non-wall cells to Empty (keep walls and start/end)
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS; c++)
+                if (_grid[r, c] == CellState.Open || _grid[r, c] == CellState.Closed || _grid[r, c] == CellState.Path)
+                    _grid[r, c] = CellState.Empty;
+
+        _grid[_startRow, _startCol] = CellState.Start;
+        _grid[_endRow, _endCol] = CellState.End;
+
+        SetPseudoHighlight(-1);
+    }
+
+    private async Task SimulationButton()
+    {
+        if (_isDone) return;
+
+        if (!_isRunning)
+        {
+            _isRunning = true;
+            if (!_astarInitialized) InitAStar();
+            await RunAStarStepByStep();
+        }
+        else
+        {
+            _isRunning = false;
+        }
+    }
+
+    private void InitAStar()
+    {
+        const int INF = int.MaxValue / 2;
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS; c++)
+                _gCost[r, c] = INF;
+
+        _gCost[_startRow, _startCol] = 0;
+        _hCost[_startRow, _startCol] = Heuristic(_startRow, _startCol);
+        _fScores[_startRow, _startCol] = _hCost[_startRow, _startCol];
+
+        _openSet.Add((_startRow, _startCol));
+        _astarInitialized = true;
+
+        _stepMessages.Add($"Initialized: start=({_startRow},{_startCol}), end=({_endRow},{_endCol}), h={_hCost[_startRow, _startCol]}");
+        _currentLogicStep = 0;
+        SetPseudoHighlight(1);
+        StateHasChanged();
+    }
+
+    private async Task RunAStarStepByStep()
+    {
+        int[] dr = { -1, 1, 0, 0 };
+        int[] dc = { 0, 0, -1, 1 };
+
+        while (_openSet.Count > 0 && _isRunning)
+        {
+            // Pick best from open
+            var current = PickBest();
+            _currentLogicStep = 1;
+            SetPseudoHighlight(5);
+            _statsOpen = _openSet.Count;
+            _statsClosed = _closedSet.Count;
+            _stepCount++;
+
+            _stepMessages.Add($"Expanding ({current.r},{current.c}), f={_gCost[current.r, current.c] + Heuristic(current.r, current.c)}");
+            StateHasChanged();
+            await Task.Delay(SimulationDelay);
+
+            if (!_isRunning) return;
+
+            // Goal check
+            if (current.r == _endRow && current.c == _endCol)
+            {
+                _currentLogicStep = 2;
+                SetPseudoHighlight(7);
+                _stepMessages.Add("Goal reached! Reconstructing path...");
+                StateHasChanged();
+                await Task.Delay(SimulationDelay);
+                await ReconstructPath();
+                _isDone = true;
+                _isRunning = false;
+                return;
+            }
+
+            // Move to closed
+            _openSet.Remove(current);
+            _closedSet.Add(current);
+            if (_grid[current.r, current.c] != CellState.Start)
+                _grid[current.r, current.c] = CellState.Closed;
+
+            // Expand neighbors
+            _currentLogicStep = 3;
+            SetPseudoHighlight(9);
+
+            for (int d = 0; d < 4; d++)
+            {
+                int nr = current.r + dr[d];
+                int nc = current.c + dc[d];
+
+                if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+                if (_grid[nr, nc] == CellState.Wall) continue;
+                if (_closedSet.Contains((nr, nc))) continue;
+
+                int tentG = _gCost[current.r, current.c] + 1;
+                if (tentG < _gCost[nr, nc])
+                {
+                    _parent[nr, nc] = (current.r, current.c);
+                    _gCost[nr, nc] = tentG;
+                    int h = Heuristic(nr, nc);
+                    _hCost[nr, nc] = h;
+                    _fScores[nr, nc] = tentG + h;
+
+                    if (!_openSet.Contains((nr, nc)))
+                    {
+                        _openSet.Add((nr, nc));
+                        if (_grid[nr, nc] != CellState.End)
+                            _grid[nr, nc] = CellState.Open;
+                    }
+                }
+            }
+
+            _statsOpen = _openSet.Count;
+            _statsClosed = _closedSet.Count;
+            StateHasChanged();
+            await Task.Delay(SimulationDelay);
+        }
+
+        if (_openSet.Count == 0 && !_isDone)
+        {
+            _stepMessages.Add("Open list exhausted — no path exists.");
+            _isDone = true;
+            _isRunning = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReconstructPath()
+    {
+        _currentLogicStep = 4;
+        SetPseudoHighlight(17);
+        var path = new List<(int r, int c)>();
+        var cur = (_endRow, _endCol);
+
+        while (cur != (_startRow, _startCol) && cur != (-1, -1))
+        {
+            path.Add(cur);
+            cur = _parent[cur.Item1, cur.Item2];
+        }
+        path.Reverse();
+        _pathLength = path.Count;
+
+        foreach (var (r, c) in path)
+        {
+            if (_grid[r, c] != CellState.End && _grid[r, c] != CellState.Start)
+                _grid[r, c] = CellState.Path;
+            StateHasChanged();
+            await Task.Delay(60);
+        }
+        _stepMessages.Add($"Path length: {_pathLength} steps.");
+    }
+
+    private (int r, int c) PickBest()
+    {
+        int bestF = int.MaxValue;
+        var best = (r: 0, c: 0);
+        foreach (var node in _openSet)
+        {
+            int f = _gCost[node.Item1, node.Item2] + _hCost[node.Item1, node.Item2];
+            if (f < bestF) { bestF = f; best = node; }
+        }
+        return best;
+    }
+
+    private int Heuristic(int r, int c) =>
+        Math.Abs(r - _endRow) + Math.Abs(c - _endCol); // Manhattan
+
+    private string CellColor(int r, int c) => _grid[r, c] switch
+    {
+        CellState.Start => "#0b57d0",
+        CellState.End => "#dc2626",
+        CellState.Wall => "#1e293b",
+        CellState.Open => "#bfdbfe",
+        CellState.Closed => "#93c5fd",
+        CellState.Path => "#fbbf24",
+        _ => "#f3f4f6"
+    };
+
+    private string GetStatus()
+    {
+        if (_isDone && _pathLength > 0) return "Done";
+        if (_isDone) return "No Path";
+        if (_isRunning) return "Running";
+        if (_stepCount > 0) return "Paused";
+        return "Ready";
+    }
+
+    private void SetPseudoHighlight(int lineIndex)
+    {
+        _pseudocode = _pseudocode.Select((p, i) => (p.text, i == lineIndex)).ToList();
+    }
+
+    public enum CellState { Empty, Start, End, Wall, Open, Closed, Path }
 }
